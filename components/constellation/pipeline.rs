@@ -576,11 +576,13 @@ impl UnprivilegedPipelineContent {
 
     #[cfg(all(not(target_os = "windows"), not(target_os = "ios")))]
     pub fn spawn_multiprocess(self) -> Result<(), Error> {
+        #[cfg(not(target_os = "android"))]
         use crate::sandboxing::content_process_sandbox_profile;
         #[cfg(not(target_os = "android"))]
         use gaol::sandbox::{self, Sandbox, SandboxMethods};
         use ipc_channel::ipc::IpcOneShotServer;
 
+        #[cfg(not(target_os = "android"))]
         impl CommandMethods for sandbox::Command {
             fn arg<T>(&mut self, arg: T)
             where
