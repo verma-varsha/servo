@@ -340,6 +340,16 @@ impl StylesheetLoadContext {
             }
         });
     }
+
+    fn should_parse_async(&self) -> bool {
+        // TODO(mandreyel): This is a placeholder. How should this be set?
+        let parse_async = PREFS
+            .get("css-parsing.parallel")
+            .as_boolean()
+            //.unwrap_or(false);
+            .unwrap_or(true); // TODO remove this is just for testing
+        parse_async && self.data.len() > 1024
+    }
 }
 
 impl PreInvoke for StylesheetLoadContext {}
@@ -370,13 +380,7 @@ impl FetchResponseListener for StylesheetLoadContext {
     }
 
     fn process_response_eof(&mut self, status: Result<ResourceFetchTiming, NetworkError>) {
-        // TODO(mandreyel): This is a placeholder. How should this be set?
-        let parse_async = PREFS
-            .get("css-parsing.parallel")
-            .as_boolean()
-            //.unwrap_or(false);
-            .unwrap_or(true); // TODO remove this is just for testing
-        if parse_async {
+        if self.should_parse_async() {
             self.parse_async(status);
         } else {
             self.parse_sync(status);
